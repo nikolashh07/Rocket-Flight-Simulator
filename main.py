@@ -1,6 +1,6 @@
 # Time-stepped integration of a model rocket's flight using real motor thrust
 # curves (thrustcurve.org), linear propellant mass loss, quadratic aerodynamic
-# drag, and parachute deployment after the motor's delay charge.
+# drag (with altitude-dependent air density), and parachute deployment after the motor's delay charge.
 # Run `python main.py` to simulate an Estes Alpha III on a C6 motor, check
 # time-step convergence, compare B6/C6/D12 motors and sweep mass and drag.
 
@@ -11,11 +11,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 G = 9.81    # gravitational acceleration, m/s^2
-RHO = 1.2   # air density, kg/m^3 (held constant; reasonable below ~1 km)
+RHO = 1.2   # sea-level air density, kg/m^3
+SCALE_HEIGHT = 8500.0  # m, exponential atmosphere scale height
 
 HERE = Path(__file__).parent
 DATA_DIR = HERE / "data"
 IMAGE_DIR = HERE / "images"
+
+
+def air_density(alt):
+    # Exponential atmosphere model: density falls off with altitude
+    return RHO * np.exp(-alt / SCALE_HEIGHT)
 
 
 # Models
@@ -131,7 +137,7 @@ def simulate(motor, rocket, dt=0.01, max_time=300.0):
         else:
             cd_a = (rocket.chute_cd * rocket.chute_area if chute_out
                     else rocket.cd * rocket.area)
-            drag = 0.5 * RHO * vel ** 2 * cd_a
+            drag = 0.5 * air_density(alt) * vel ** 2 * cd_a
             if vel > 0:
                 acc = (thrust - weight - drag) / mass
             else:
