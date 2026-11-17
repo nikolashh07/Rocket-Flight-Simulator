@@ -167,6 +167,7 @@ def simulate(motor, rocket, dt=0.01, max_time=300.0):
         "apogee": apogee_alt if apogee_alt is not None else alts.max(),
         "apogee_t": apogee_t,
         "burnout_t": burnout_t,
+        "chute_t": burnout_t + motor.delay if burnout_t is not None else None,
         "max_speed": np.abs(vels).max(),
         "max_acc_g": accs.max() / G,
         "flight_time": ts[-1],
@@ -180,6 +181,7 @@ def print_summary(r):
     print(f"Max speed    : {r['max_speed']:.1f} m/s")
     print(f"Max accel    : {r['max_acc_g']:.1f} g")
     print(f"Burnout time : {r['burnout_t']:.2f} s")
+    print(f"Chute deploy : {r['chute_t']:.2f} s")
     print(f"Flight time  : {r['flight_time']:.1f} s")
 
 
