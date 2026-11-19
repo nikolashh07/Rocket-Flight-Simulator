@@ -1,0 +1,65 @@
+[theme]
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap"
+codeFont = "'DM Mono':https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap"
+baseRadius = "6px"
+buttonRadius = "full"
+paddingTop = "0"
+paddingBottom = "0"
+metricValueFontSize = "2rem"
+metricValueFontWeight = 700
+headingFontWeights = [800, 700, 700, 600, 600, 500]
+linkUnderline = false
+
+[theme.light]
+primaryColor = "#12296b"
+backgroundColor = "#f4f1ea"
+secondaryBackgroundColor = "#ebe7dd"
+textColor = "#0b0a09"
+borderColor = "#cfc9bd"
+linkColor = "#12296b"
+chartCategoricalColors = ["#12296b", "#4c7be0", "#8d887f", "#0b0a09", "#b8860b", "#2f9e44", "#7a1b2d"]
+chartSequentialColors = ["#eaf0fc", "#d0dcf7", "#adc2ef", "#86a3e4", "#5f83d6", "#3d63c0", "#274aa3", "#17357f", "#0e2461", "#081a47"]
+
+greenColor = "#1f4d2e"
+greenBackgroundColor = "#e1ede4"
+greenTextColor = "#14381f"
+yellowColor = "#9c3d1a"
+yellowBackgroundColor = "#f6e4dc"
+yellowTextColor = "#7a2e12"
+redColor = "#6d1a2c"
+redBackgroundColor = "#f3dde1"
+redTextColor = "#561423"
+
+[theme.light.sidebar]
+backgroundColor = "#ebe7dd"
+secondaryBackgroundColor = "#f4f1ea"
+borderColor = "#cfc9bd"
+
+[theme.dark]
+primaryColor = "#3d6fe0"
+backgroundColor = "#070b16"
+secondaryBackgroundColor = "#0f1628"
+textColor = "#f4f1ea"
+borderColor = "#1f2a44"
+linkColor = "#8fb2ff"
+chartCategoricalColors = ["#6f9bff", "#f4f1ea", "#8d887f", "#e0b84d", "#51cf66", "#c75c70", "#3bc9db"]
+chartSequentialColors = ["#0b1a3d", "#10275c", "#15347d", "#1c449e", "#2656c0", "#3b6fe0", "#5f8cf0", "#86a9f7", "#b0c8fb", "#dae6fd"]
+
+greenColor = "#3f9a5c"
+greenBackgroundColor = "#10261a"
+greenTextColor = "#8fdcaa"
+yellowColor = "#d9703f"
+yellowBackgroundColor = "#2e1710"
+yellowTextColor = "#f0a07a"
+redColor = "#c4476a"
+redBackgroundColor = "#2a1019"
+redTextColor = "#f08aa4"
+
+[theme.dark.sidebar]
+backgroundColor = "#0a1020"
+secondaryBackgroundColor = "#131b30"
+borderColor = "#1f2a44"
+
+[client]
+toolbarMode = "minimal"
