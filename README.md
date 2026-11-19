@@ -22,7 +22,19 @@ pip install -r requirements.txt
 python main.py
 ```
 
-This prints a flight summary and saves the plots to `images/`.
+This prints a flight summary for each motor, saves the plots to `images/` and opens the interactive app in your browser. To open only the app, run `streamlit run app.py`.
+
+## Interactive app
+
+The sidebar controls every input: motor (including your own `.eng` files), ejection delay, motor masses, rocket mass, diameter and drag, parachute size and drag, launch elevation, air density, gravity, a safe landing speed and the solver time step. The app shows:
+
+- Key numbers (apogee, max speed and acceleration, landing speed, thrust to weight, dynamic pressure) and plain-language checks on parachute timing and landing speed
+- **Flight:** altitude, velocity, acceleration and thrust charts with an event table
+- **Compare motors:** every motor on the same rocket, with a results table
+- **Sweeps:** vary one setting and plot apogee, speed, landing speed or flight time
+- **Validation:** overlay on OpenRocket data, including your own CSV
+- **Data:** CSV download and the motor and rocket specifications
+- **Physics:** the equations and the model's limits
 
 ## Validation against OpenRocket
 
