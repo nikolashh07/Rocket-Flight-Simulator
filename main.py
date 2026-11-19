@@ -4,7 +4,10 @@
 # Run `python main.py` to simulate an Estes Alpha III on a C6 motor, check
 # time-step convergence, compare B6/C6/D12 motors and sweep mass and drag.
 
+import bisect
 import csv
+import subprocess
+import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -19,9 +22,9 @@ DATA_DIR = HERE / "data"
 IMAGE_DIR = HERE / "images"
 
 
-def air_density(alt):
+def air_density(alt, rho0=RHO, scale_height=SCALE_HEIGHT):
     # Exponential atmosphere model: density falls off with altitude
-    return RHO * np.exp(-alt / SCALE_HEIGHT)
+    return rho0 * np.exp(-alt / scale_height)
 
 
 # Models
@@ -39,8 +42,21 @@ class Motor:
         return self.times[-1]
 
     def thrust(self, t):
-        # Thrust at time t, interpolated from the data table
-        return float(np.interp(t, self.times, self.thrusts, right=0.0))
+        # Thrust at time t, interpolated linearly from the data table, and zero after
+        # burnout. Same result as np.interp(t, times, thrusts, right=0), but plain
+        # Python is several times faster for one value at a time, which keeps the
+        # app responsive while sliders are dragged.
+        times, thrusts = self.times, self.thrusts
+        if t > times[-1]:
+            return 0.0
+        if t <= times[0]:
+            return float(thrusts[0])
+        i = bisect.bisect_right(times, t)
+        if i >= len(times):
+            return float(thrusts[-1])
+        t0, t1 = times[i - 1], times[i]
+        f0, f1 = thrusts[i - 1], thrusts[i]
+        return float(f0 + (f1 - f0) * (t - t0) / (t1 - t0))
 
     def mass(self, t):
         # Motor mass at time t, with propellant burning off linearly
@@ -80,10 +96,15 @@ def load_thrust_csv(path, name, total_mass, prop_mass, delay):
 
 
 def load_eng(path, name, delay):
-    # Load a RASP .eng file. Masses come from the header line
+    # Load a RASP .eng file from disk
+    return parse_eng(Path(path).read_text(), name, delay)
+
+
+def parse_eng(text, name, delay):
+    # Parse RASP .eng text. Masses come from the header line
     times, thrusts = [0.0], [0.0]
     header = None
-    for line in Path(path).read_text().splitlines():
+    for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith(";"):
             continue
@@ -106,8 +127,10 @@ ALPHA_III = Rocket(dry_mass=0.0482, diameter=0.0248, cd=0.63)
 
 
 # Simulation
-def simulate(motor, rocket, dt=0.01, max_time=300.0):
-    # Simulate one flight and return time series plus summary values
+def simulate(motor, rocket, dt=0.01, max_time=300.0, g=G, rho0=RHO,
+             scale_height=SCALE_HEIGHT):
+    # Simulate one flight and return time series plus summary values.
+    # g, rho0 (air density at the launch pad) and scale_height set the environment
     t, alt, vel = 0.0, 0.0, 0.0
     phase = "pad"
     apogee_alt = apogee_t = burnout_t = None
@@ -117,7 +140,7 @@ def simulate(motor, rocket, dt=0.01, max_time=300.0):
     while t < max_time:
         thrust = motor.thrust(t)
         mass = rocket.dry_mass + motor.mass(t)
-        weight = mass * G
+        weight = mass * g
 
         # Flight phase logic
         if phase == "pad" and thrust > weight:
@@ -137,7 +160,7 @@ def simulate(motor, rocket, dt=0.01, max_time=300.0):
         else:
             cd_a = (rocket.chute_cd * rocket.chute_area if chute_out
                     else rocket.cd * rocket.area)
-            drag = 0.5 * air_density(alt) * vel ** 2 * cd_a
+            drag = 0.5 * air_density(alt, rho0, scale_height) * vel ** 2 * cd_a
             if vel > 0:
                 acc = (thrust - weight - drag) / mass
             else:
@@ -283,7 +306,9 @@ def validate(result, csv_path, path):
 
 def main():
     result = simulate(C6, ALPHA_III)
-    print_summary(result)
+    for motor in (B6, C6, D12):
+        print_summary(result if motor is C6 else simulate(motor, ALPHA_III))
+        print()
     dt_convergence(C6, ALPHA_III)
 
     reference = DATA_DIR / "openrocket.csv"
@@ -294,6 +319,9 @@ def main():
     compare_motors(ALPHA_III, [B6, C6, D12], IMAGE_DIR / "motors.png")
     sweep(C6, ALPHA_III, IMAGE_DIR / "sweep.png")
     print("\nSaved plots to images/")
+
+    print("Opening the app in your browser (Ctrl+C to stop)...")
+    subprocess.run([sys.executable, "-m", "streamlit", "run", str(HERE / "app.py")])
 
 
 if __name__ == "__main__":
